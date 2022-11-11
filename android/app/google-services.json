@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "333942013043",
+    "project_id": "gallery-app-41370",
+    "storage_bucket": "gallery-app-41370.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:333942013043:android:cd07b5d74d779895443e06",
+        "android_client_info": {
+          "package_name": "com.aim2u.galery_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "333942013043-5cqsn9m3069q2mlagl3033m7kt356046.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFkPkfFkqyeLKrhYJCMwO9Wp6RJLzaUZ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "333942013043-5cqsn9m3069q2mlagl3033m7kt356046.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "333942013043-8stfsbor9kf5nkk9lio0rg7bs12665n7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.aim2u.galeryApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

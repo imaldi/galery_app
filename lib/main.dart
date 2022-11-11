@@ -4,7 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:galery_app/presentation/widgets/image_picker/my_image_picker.dart';
 import 'firebase_options.dart';
 
-// test commit amend lagi
+// test commit firebase cloud
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(

@@ -50,10 +50,14 @@ class _MyImagePickerWidgetState extends State<MyImagePickerWidget> {
                 .whenComplete(() {
               Navigator.of(context).pop();
             });
-            cubit.updateState(
-                storedImage: await fileCompressor(
-                    File(pickedFile?.path ?? ""), imageQuality),
-                isLoading: false);
+            try{
+              cubit.updateState(
+                  storedImage: await fileCompressor(
+                      File(pickedFile?.path ?? ""), imageQuality),
+                  isLoading: false);
+            } on FileSystemException {
+              cubit.updateState(isLoading: false);
+            }
           });
         },
         positiveButtonText: "From Gallery",
@@ -64,7 +68,7 @@ class _MyImagePickerWidgetState extends State<MyImagePickerWidget> {
             ImagePicker imagePicker = ImagePicker();
 
             XFile? pickedFile = await imagePicker
-                .pickImage(source: ImageSource.gallery)
+                .pickImage(source: ImageSource.camera)
                 .whenComplete(() {
               Navigator.of(context).pop();
             });
@@ -75,7 +79,6 @@ class _MyImagePickerWidgetState extends State<MyImagePickerWidget> {
                   isLoading: false);
             } on FileSystemException {
               cubit.updateState(isLoading: false);
-
             }
           });
         },
@@ -188,7 +191,7 @@ class _MyImagePickerWidgetState extends State<MyImagePickerWidget> {
                         builderContext, cubitState);
                   }
                 : null,
-            child: Container(
+            child: IntrinsicHeight(
               child: Column(
                 children: [
                   SizedBox(
@@ -203,20 +206,26 @@ class _MyImagePickerWidgetState extends State<MyImagePickerWidget> {
                               child: SizedBox(
                                 height: widthScreen(context) * 0.4,
                                 width: widthScreen(context) * 0.4,
-                                child: const FittedBox(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(sizeSmall),
-                                    child: RoundedContainer(
-                                      sizeNormal,
-                                      // height: widthScreen(context) * 0.4,
-                                      // width: widthScreen(context) * 0.4,
-                                      boxDecoration:
-                                          BoxDecoration(color: primaryGreen),
-                                      child: Icon(Icons.camera_alt, color: Colors.white,),
-                                      // SvgPicture.asset(
-                                      //   "assets/images/bi_camera.svg",
-                                      // ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(sizeSmall),
+                                  child: RoundedContainer(
+                                    sizeNormal,
+                                    // height: widthScreen(context) * 0.4,
+                                    // width: widthScreen(context) * 0.4,
+                                    boxDecoration:
+                                        const BoxDecoration(color: primaryGreen),
+                                    child: IntrinsicHeight(
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: const [
+                                          Icon(Icons.camera_alt, color: Colors.white,size: sizeHuge,),
+                                          FittedBox(child: Text("Choose Image",style: TextStyle(color: Colors.white),)),
+                                        ],
+                                      ),
                                     ),
+                                    // SvgPicture.asset(
+                                    //   "assets/images/bi_camera.svg",
+                                    // ),
                                   ),
                                 ),
                               ),
@@ -295,11 +304,27 @@ class _DefaultIconPlaceholder extends StatelessWidget {
                 height: sizeBig,
                 width: sizeBig,
                 child: FittedBox(child: CircularProgressIndicator(color: primaryGreen,)))
-            : Icon(
-                Icons.image,
-                size: widthScreen(context) * 0.4,
-                color: primaryGreen,
-              );
+            : FittedBox(
+          child: Padding(
+            padding: const EdgeInsets.all(sizeNormal),
+            child: RoundedContainer(
+              sizeNormal,
+              height: widthScreen(context) * 0.4,
+              width: widthScreen(context) * 0.4,
+              boxDecoration: const BoxDecoration(color: Colors.grey),
+              child: const Center(
+                child:  FittedBox(
+                  child: Text(
+                    "No Picture Selected",
+                    style: TextStyle(color: Colors.white,
+                    fontSize: sizeBig,),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
       },
     );
   }

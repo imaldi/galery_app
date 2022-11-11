@@ -1,3 +1,8 @@
+import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -10,6 +15,18 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Firebase AppCheck
+  await FirebaseAppCheck.instance.activate(
+    webRecaptchaSiteKey: 'recaptcha-v3-site-key',
+    // Default provider for Android is the Play Integrity provider. You can use the "AndroidProvider" enum to choose
+    // your preferred provider. Choose from:
+    // 1. debug provider
+    // 2. safety net provider
+    // 3. play integrity provider
+    androidProvider: AndroidProvider.debug,
+  );
+
   var statusCamera = await Permission.camera.status;
   var statusStorage = await Permission.storage.status;
   if (statusCamera.isDenied) await Permission.camera.request();
@@ -72,26 +89,76 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String imageName = '';
+  File? fileUploaded;
+
+
+
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    final storage = FirebaseStorage.instance;
+    // Create a storage reference from our app
+    final storageRef = storage.ref();
+
+    // Create a reference to "mountains.jpg"
+    final mountainsRef = storageRef.child(imageName);
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: const Center(
+      body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child:
-        MyImagePickerWidget(),
+        MyImagePickerWidget(
+          functionCallbackSetImageFilePath: (file){
+            setState((){
+              fileUploaded = file;
+              imageName = file?.path.split("/").last ?? "";
+            });
+          },
+        ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: fileUploaded != null ? () async {
+          try {
+            // Firebase sign in (nanti pindahkan ke halaman login)
+            final GoogleSignIn googleSignIn = GoogleSignIn();
+            User? firebaseUser;
+            GoogleSignInAccount? account = await googleSignIn.signIn();
+            final GoogleSignInAuthentication? googleAuth = await account?.authentication;
+            final AuthCredential cred = GoogleAuthProvider.credential(idToken: googleAuth?.idToken, accessToken: googleAuth?.accessToken);
+            final UserCredential _res = await FirebaseAuth.instance.signInWithCredential(cred);
+            firebaseUser = _res.user;
+
+            // upload file ke storage
+            await mountainsRef.putFile(fileUploaded!).snapshotEvents.listen((taskSnapshot) {
+              switch(taskSnapshot.state){
+                case TaskState.running:
+                // ...
+                  break;
+                case TaskState.paused:
+                // ...
+                  break;
+                case TaskState.success:
+                  print("Success Upload to firebase cloud");
+                  break;
+                case TaskState.canceled:
+                // ...
+                  break;
+                case TaskState.error:
+                // ...
+                  break;
+
+              }
+            });
+          } on FirebaseException catch (e) {
+            print("ERROR: ${e.toString()}");
+          }
+        } : null,
+        child: const Icon(Icons.send),),
     );
   }
 }

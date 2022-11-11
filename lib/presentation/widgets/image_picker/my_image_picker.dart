@@ -21,7 +21,7 @@ class MyImagePickerWidget extends StatefulWidget {
     this.defaultImagePlaceholder,
   }) : super(key: key);
 
-  final Function(int, File?)? functionCallbackSetImageFilePath;
+  final Function(File?)? functionCallbackSetImageFilePath;
   final bool isEnabled;
   final String? imageURL;
   final String? localImageURL;
@@ -176,7 +176,7 @@ class _MyImagePickerWidgetState extends State<MyImagePickerWidget> {
         return BlocListener<ImagePickerCubit, ImagePickerCubitState>(
           listener: (context, state) {
             widget.functionCallbackSetImageFilePath
-                ?.call(69, state.storedImage);
+                ?.call(state.storedImage);
 
             FocusScope.of(context).unfocus();
           },

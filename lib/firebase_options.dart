@@ -63,6 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '333942013043',
     projectId: 'gallery-app-41370',
     storageBucket: 'gallery-app-41370.appspot.com',
+    androidClientId: '333942013043-6m2j8hqedd9b27ckgglbug7tp902lo2b.apps.googleusercontent.com',
     iosClientId: '333942013043-8stfsbor9kf5nkk9lio0rg7bs12665n7.apps.googleusercontent.com',
     iosBundleId: 'com.aim2u.galeryApp',
   );

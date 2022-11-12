@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:drift/drift.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:galery_app/data/datasources/local/app_database.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
@@ -144,6 +146,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   break;
                 case TaskState.success:
                   var theUrl = await taskSnapshot.ref.getDownloadURL();
+                  final database = MyDatabase();
+
+                  // Simple insert:
+                  await database
+                      .into(database.fileEntities)
+                      .insert(FileEntitiesCompanion.insert(name: '${imageName}',url: Value<String>(theUrl)));
+
+                  // Simple select:
+                  final allFiles = await database.select(database.fileEntities).get();
+                  print('Files in database: $allFiles');
                   print("Success Upload to firebase cloud, URL: ${theUrl}");
                   break;
                 case TaskState.canceled:

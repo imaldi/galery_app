@@ -22,7 +22,7 @@ Future<File> fileCompressor(File file, ImageQuality imageQuality) async {
   var filePath = file.path;
   final lastIndex = filePath.lastIndexOf(RegExp(r'.jp|.pn'));
   final splitted = filePath.substring(0, (lastIndex));
-  final outPath = "${splitted}_out${filePath.substring(lastIndex)}";
+  final outPath = "$splitted${imageQuality == ImageQuality.medium? "_medium" : "_low"}${filePath.substring(lastIndex)}";
   print("outPath: $outPath");
     var compressedResult = await FlutterImageCompress.compressAndGetFile(
       file.absolute.path,

@@ -134,7 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
             firebaseUser = _res.user;
 
             // upload file ke storage
-            await mountainsRef.putFile(fileUploaded!).snapshotEvents.listen((taskSnapshot) {
+            mountainsRef.putFile(fileUploaded!).snapshotEvents.listen((taskSnapshot) async {
               switch(taskSnapshot.state){
                 case TaskState.running:
                 // ...
@@ -143,7 +143,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 // ...
                   break;
                 case TaskState.success:
-                  print("Success Upload to firebase cloud");
+                  var theUrl = await taskSnapshot.ref.getDownloadURL();
+                  print("Success Upload to firebase cloud, URL: ${theUrl}");
                   break;
                 case TaskState.canceled:
                 // ...
@@ -154,6 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
               }
             });
+                // .onData((data) {});
           } on FirebaseException catch (e) {
             print("ERROR: ${e.toString()}");
           }

@@ -2,13 +2,14 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:galery_app/data/datasources/local/database/dao/file_entity_dao.dart';
 import 'package:galery_app/domain/entities/tags.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:galery_app/domain/entities/file_entities.dart';
 
 part 'app_database.g.dart';
-@DriftDatabase(tables: [FileEntities, Tags])
+@DriftDatabase(tables: [FileEntities, Tags],daos: [FileEntityDao])
 class MyDatabase extends _$MyDatabase {
   // we tell the database where to store the data with this constructor
   MyDatabase() : super(_openConnection());
@@ -16,7 +17,7 @@ class MyDatabase extends _$MyDatabase {
   // you should bump this number whenever you change or add a table definition.
   // Migrations are covered later in the documentation.
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -24,7 +25,15 @@ class MyDatabase extends _$MyDatabase {
       onUpgrade: (migrator, from, to) async {
         if (from == 1) {
           await migrator.addColumn(fileEntities, fileEntities.url);
-          await migrator.createTable(tags);
+          // await migrator.createTable(tags);
+        }
+        if(from == 2){
+          // m.renameColumn(fileEntities, 'utc_date', yourTable);
+          await migrator.alterTable(TableMigration(fileEntities));
+          await migrator.addColumn(fileEntities, fileEntities.date);
+          // await migrator.alterTable(TableMigration(fileEntities, columnTransformer: {
+          //   fileEntities.date = DateTime.fromUTC
+          // }));
         }
       },
       // This migration property ties in nicely with the foreign key we've added previously.

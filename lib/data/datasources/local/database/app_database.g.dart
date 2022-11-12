@@ -12,14 +12,14 @@ class FileEntity extends DataClass implements Insertable<FileEntity> {
   final String name;
   final String? url;
   final String? location;
-  final int? utcDate;
+  final DateTime? date;
   final String? tagName;
   const FileEntity(
       {required this.id,
       required this.name,
       this.url,
       this.location,
-      this.utcDate,
+      this.date,
       this.tagName});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -32,8 +32,8 @@ class FileEntity extends DataClass implements Insertable<FileEntity> {
     if (!nullToAbsent || location != null) {
       map['location'] = Variable<String>(location);
     }
-    if (!nullToAbsent || utcDate != null) {
-      map['utc_date'] = Variable<int>(utcDate);
+    if (!nullToAbsent || date != null) {
+      map['date'] = Variable<DateTime>(date);
     }
     if (!nullToAbsent || tagName != null) {
       map['tag_name'] = Variable<String>(tagName);
@@ -49,9 +49,7 @@ class FileEntity extends DataClass implements Insertable<FileEntity> {
       location: location == null && nullToAbsent
           ? const Value.absent()
           : Value(location),
-      utcDate: utcDate == null && nullToAbsent
-          ? const Value.absent()
-          : Value(utcDate),
+      date: date == null && nullToAbsent ? const Value.absent() : Value(date),
       tagName: tagName == null && nullToAbsent
           ? const Value.absent()
           : Value(tagName),
@@ -66,7 +64,7 @@ class FileEntity extends DataClass implements Insertable<FileEntity> {
       name: serializer.fromJson<String>(json['name']),
       url: serializer.fromJson<String?>(json['url']),
       location: serializer.fromJson<String?>(json['location']),
-      utcDate: serializer.fromJson<int?>(json['utcDate']),
+      date: serializer.fromJson<DateTime?>(json['date']),
       tagName: serializer.fromJson<String?>(json['tagName']),
     );
   }
@@ -78,7 +76,7 @@ class FileEntity extends DataClass implements Insertable<FileEntity> {
       'name': serializer.toJson<String>(name),
       'url': serializer.toJson<String?>(url),
       'location': serializer.toJson<String?>(location),
-      'utcDate': serializer.toJson<int?>(utcDate),
+      'date': serializer.toJson<DateTime?>(date),
       'tagName': serializer.toJson<String?>(tagName),
     };
   }
@@ -88,14 +86,14 @@ class FileEntity extends DataClass implements Insertable<FileEntity> {
           String? name,
           Value<String?> url = const Value.absent(),
           Value<String?> location = const Value.absent(),
-          Value<int?> utcDate = const Value.absent(),
+          Value<DateTime?> date = const Value.absent(),
           Value<String?> tagName = const Value.absent()}) =>
       FileEntity(
         id: id ?? this.id,
         name: name ?? this.name,
         url: url.present ? url.value : this.url,
         location: location.present ? location.value : this.location,
-        utcDate: utcDate.present ? utcDate.value : this.utcDate,
+        date: date.present ? date.value : this.date,
         tagName: tagName.present ? tagName.value : this.tagName,
       );
   @override
@@ -105,14 +103,14 @@ class FileEntity extends DataClass implements Insertable<FileEntity> {
           ..write('name: $name, ')
           ..write('url: $url, ')
           ..write('location: $location, ')
-          ..write('utcDate: $utcDate, ')
+          ..write('date: $date, ')
           ..write('tagName: $tagName')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, url, location, utcDate, tagName);
+  int get hashCode => Object.hash(id, name, url, location, date, tagName);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -121,7 +119,7 @@ class FileEntity extends DataClass implements Insertable<FileEntity> {
           other.name == this.name &&
           other.url == this.url &&
           other.location == this.location &&
-          other.utcDate == this.utcDate &&
+          other.date == this.date &&
           other.tagName == this.tagName);
 }
 
@@ -130,14 +128,14 @@ class FileEntitiesCompanion extends UpdateCompanion<FileEntity> {
   final Value<String> name;
   final Value<String?> url;
   final Value<String?> location;
-  final Value<int?> utcDate;
+  final Value<DateTime?> date;
   final Value<String?> tagName;
   const FileEntitiesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.url = const Value.absent(),
     this.location = const Value.absent(),
-    this.utcDate = const Value.absent(),
+    this.date = const Value.absent(),
     this.tagName = const Value.absent(),
   });
   FileEntitiesCompanion.insert({
@@ -145,7 +143,7 @@ class FileEntitiesCompanion extends UpdateCompanion<FileEntity> {
     required String name,
     this.url = const Value.absent(),
     this.location = const Value.absent(),
-    this.utcDate = const Value.absent(),
+    this.date = const Value.absent(),
     this.tagName = const Value.absent(),
   }) : name = Value(name);
   static Insertable<FileEntity> custom({
@@ -153,7 +151,7 @@ class FileEntitiesCompanion extends UpdateCompanion<FileEntity> {
     Expression<String>? name,
     Expression<String>? url,
     Expression<String>? location,
-    Expression<int>? utcDate,
+    Expression<DateTime>? date,
     Expression<String>? tagName,
   }) {
     return RawValuesInsertable({
@@ -161,7 +159,7 @@ class FileEntitiesCompanion extends UpdateCompanion<FileEntity> {
       if (name != null) 'name': name,
       if (url != null) 'url': url,
       if (location != null) 'location': location,
-      if (utcDate != null) 'utc_date': utcDate,
+      if (date != null) 'date': date,
       if (tagName != null) 'tag_name': tagName,
     });
   }
@@ -171,14 +169,14 @@ class FileEntitiesCompanion extends UpdateCompanion<FileEntity> {
       Value<String>? name,
       Value<String?>? url,
       Value<String?>? location,
-      Value<int?>? utcDate,
+      Value<DateTime?>? date,
       Value<String?>? tagName}) {
     return FileEntitiesCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       url: url ?? this.url,
       location: location ?? this.location,
-      utcDate: utcDate ?? this.utcDate,
+      date: date ?? this.date,
       tagName: tagName ?? this.tagName,
     );
   }
@@ -198,8 +196,8 @@ class FileEntitiesCompanion extends UpdateCompanion<FileEntity> {
     if (location.present) {
       map['location'] = Variable<String>(location.value);
     }
-    if (utcDate.present) {
-      map['utc_date'] = Variable<int>(utcDate.value);
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
     }
     if (tagName.present) {
       map['tag_name'] = Variable<String>(tagName.value);
@@ -214,7 +212,7 @@ class FileEntitiesCompanion extends UpdateCompanion<FileEntity> {
           ..write('name: $name, ')
           ..write('url: $url, ')
           ..write('location: $location, ')
-          ..write('utcDate: $utcDate, ')
+          ..write('date: $date, ')
           ..write('tagName: $tagName')
           ..write(')'))
         .toString();
@@ -253,11 +251,11 @@ class $FileEntitiesTable extends FileEntities
   late final GeneratedColumn<String> location = GeneratedColumn<String>(
       'location', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  final VerificationMeta _utcDateMeta = const VerificationMeta('utcDate');
+  final VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
-  late final GeneratedColumn<int> utcDate = GeneratedColumn<int>(
-      'utc_date', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+      'date', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   final VerificationMeta _tagNameMeta = const VerificationMeta('tagName');
   @override
   late final GeneratedColumn<String> tagName = GeneratedColumn<String>(
@@ -267,7 +265,7 @@ class $FileEntitiesTable extends FileEntities
       $customConstraints: 'NULL REFERENCES tags(name)');
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, url, location, utcDate, tagName];
+      [id, name, url, location, date, tagName];
   @override
   String get aliasedName => _alias ?? 'file_entities';
   @override
@@ -294,9 +292,9 @@ class $FileEntitiesTable extends FileEntities
       context.handle(_locationMeta,
           location.isAcceptableOrUnknown(data['location']!, _locationMeta));
     }
-    if (data.containsKey('utc_date')) {
-      context.handle(_utcDateMeta,
-          utcDate.isAcceptableOrUnknown(data['utc_date']!, _utcDateMeta));
+    if (data.containsKey('date')) {
+      context.handle(
+          _dateMeta, date.isAcceptableOrUnknown(data['date']!, _dateMeta));
     }
     if (data.containsKey('tag_name')) {
       context.handle(_tagNameMeta,
@@ -319,8 +317,8 @@ class $FileEntitiesTable extends FileEntities
           .read(DriftSqlType.string, data['${effectivePrefix}url']),
       location: attachedDatabase.options.types
           .read(DriftSqlType.string, data['${effectivePrefix}location']),
-      utcDate: attachedDatabase.options.types
-          .read(DriftSqlType.int, data['${effectivePrefix}utc_date']),
+      date: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}date']),
       tagName: attachedDatabase.options.types
           .read(DriftSqlType.string, data['${effectivePrefix}tag_name']),
     );
@@ -507,6 +505,7 @@ abstract class _$MyDatabase extends GeneratedDatabase {
   _$MyDatabase(QueryExecutor e) : super(e);
   late final $FileEntitiesTable fileEntities = $FileEntitiesTable(this);
   late final $TagsTable tags = $TagsTable(this);
+  late final FileEntityDao fileEntityDao = FileEntityDao(this as MyDatabase);
   @override
   Iterable<TableInfo<Table, dynamic>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();

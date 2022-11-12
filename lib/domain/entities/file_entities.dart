@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:galery_app/data/datasources/local/app_database.dart';
+import 'package:galery_app/data/datasources/local/database/app_database.dart';
 
 // this will generate a table called "FileEntities" for us. The rows of that table will
 // be represented by a class called "FileEntities".
@@ -9,7 +9,7 @@ class FileEntities extends Table {
   TextColumn get name => text().withLength(min: 6)();
   TextColumn get url => text().nullable()();
   TextColumn get location => text().nullable()();
-  IntColumn get utcDate => integer().nullable()();
+  DateTimeColumn get date => dateTime().nullable()();
   // add nullable tagName
   TextColumn get tagName =>
       text().nullable().customConstraint('NULL REFERENCES tags(name)')();

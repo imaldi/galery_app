@@ -29,8 +29,8 @@ class MyDatabase extends _$MyDatabase {
         }
         if(from == 2){
           // m.renameColumn(fileEntities, 'utc_date', yourTable);
-          await migrator.alterTable(TableMigration(fileEntities));
           await migrator.addColumn(fileEntities, fileEntities.date);
+          await migrator.alterTable(TableMigration(fileEntities));
           // await migrator.alterTable(TableMigration(fileEntities, columnTransformer: {
           //   fileEntities.date = DateTime.fromUTC
           // }));

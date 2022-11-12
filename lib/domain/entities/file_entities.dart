@@ -26,4 +26,9 @@ class FileWithTag {
     required this.theFile,
     this.tag,
   });
+
+  @override
+  String toString() {
+    return "{file: ${theFile.toString()},\ntags: ${tag}";
+  }
 }

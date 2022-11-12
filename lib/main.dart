@@ -1,6 +1,8 @@
 import 'dart:io';
-import 'package:drift/drift.dart';
+// This is why we should separate logic and view
+import 'package:drift/drift.dart' as DriftImport;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:galery_app/core/resources/consts/sizes.dart';
 import 'package:galery_app/data/datasources/local/database/app_database.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -9,6 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:galery_app/presentation/widgets/image_picker/my_image_picker.dart';
+import 'package:provider/provider.dart';
+import 'data/datasources/local/database/dao/file_entity_dao.dart';
+import 'domain/entities/file_entities.dart';
 import 'firebase_options.dart';
 
 // test commit firebase cloud
@@ -29,6 +34,16 @@ void main() async {
     androidProvider: AndroidProvider.debug,
   );
 
+  // Firebase sign in (nanti pindahkan ke halaman login)
+  final GoogleSignIn googleSignIn = GoogleSignIn();
+  User? firebaseUser;
+  GoogleSignInAccount? account = await googleSignIn.signIn();
+  final GoogleSignInAuthentication? googleAuth = await account?.authentication;
+  final AuthCredential cred = GoogleAuthProvider.credential(idToken: googleAuth?.idToken, accessToken: googleAuth?.accessToken);
+  final UserCredential _res = await FirebaseAuth.instance.signInWithCredential(cred);
+  firebaseUser = _res.user;
+  print(firebaseUser);
+
   var statusCamera = await Permission.camera.status;
   var statusStorage = await Permission.storage.status;
   if (statusCamera.isDenied) await Permission.camera.request();
@@ -44,7 +59,12 @@ void main() async {
     await Permission.manageExternalStorage.request();
   }
 
-  runApp(const MyApp());
+  runApp(Provider(
+    create: (BuildContext context) { return MyDatabase(); },
+    child: const
+    MyApp(),
+  )
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -53,21 +73,29 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    return Builder(
+      builder: (context) {
+        final db = Provider.of<MyDatabase>(context);
+        return Provider<FileEntityDao>(
+          create: (BuildContext context) { return db.fileEntityDao; },
+          child: MaterialApp(
+            title: 'Flutter Demo',
+            theme: ThemeData(
+              // This is the theme of your application.
+              //
+              // Try running your application with "flutter run". You'll see the
+              // application has a blue toolbar. Then, without quitting the app, try
+              // changing the primarySwatch below to Colors.green and then invoke
+              // "hot reload" (press "r" in the console where you ran "flutter run",
+              // or simply save your changes to "hot reload" in a Flutter IDE).
+              // Notice that the counter didn't reset back to zero; the application
+              // is not restarted.
+              primarySwatch: Colors.blue,
+            ),
+            home: const MyHomePage(title: 'Flutter Demo Home Page'),
+          ),
+        );
+      }
     );
   }
 }
@@ -98,81 +126,124 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final storage = FirebaseStorage.instance;
-    // Create a storage reference from our app
-    final storageRef = storage.ref();
 
-    // Create a reference to "mountains.jpg"
-    final mountainsRef = storageRef.child(imageName);
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child:
-        MyImagePickerWidget(
-          functionCallbackSetImageFilePath: (file){
-            setState((){
-              fileUploaded = file;
-              imageName = file?.path.split("/").last ?? "";
-            });
-          },
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: fileUploaded != null ? () async {
-          try {
-            // Firebase sign in (nanti pindahkan ke halaman login)
-            final GoogleSignIn googleSignIn = GoogleSignIn();
-            User? firebaseUser;
-            GoogleSignInAccount? account = await googleSignIn.signIn();
-            final GoogleSignInAuthentication? googleAuth = await account?.authentication;
-            final AuthCredential cred = GoogleAuthProvider.credential(idToken: googleAuth?.idToken, accessToken: googleAuth?.accessToken);
-            final UserCredential _res = await FirebaseAuth.instance.signInWithCredential(cred);
-            firebaseUser = _res.user;
+    return Builder(
+      builder: (context) {
+        StreamBuilder<List<FileWithTag>> _buildTaskList(BuildContext context) {
+          final dao = Provider.of<FileEntityDao>(context,listen: false);
+          return StreamBuilder(
+            stream:
+            dao.watchAllTasks(),
+            builder: (context, AsyncSnapshot<List<FileWithTag>> snapshot) {
+              final files = snapshot.data ?? [];
 
-            // upload file ke storage
-            mountainsRef.putFile(fileUploaded!).snapshotEvents.listen((taskSnapshot) async {
-              switch(taskSnapshot.state){
-                case TaskState.running:
-                // ...
-                  break;
-                case TaskState.paused:
-                // ...
-                  break;
-                case TaskState.success:
-                  var theUrl = await taskSnapshot.ref.getDownloadURL();
-                  final database = MyDatabase();
+              return ListView.builder(
+                itemCount: files.length,
+                itemBuilder: (_, index) {
+                  final itemTask = files[index];
+                  // return Text("${itemTask}");
+                  // FIXME change with ListTile and later make a gridview
+                  return Center(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: sizeNormal),
+                      child: IntrinsicWidth(
+                        child: Row(
+                          children: [
+                            SizedBox(
+                                width: sizeHuge,
+                                height: sizeHuge,
+                                child: Image.network("${itemTask.theFile.url}",width: sizeMedium,fit: BoxFit.cover,)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                  ;
+                  // return _buildListItem(itemTask, dao);
+                },
+              );
+            },
+          );
+        }
 
-                  // Simple insert:
-                  await database
-                      .into(database.fileEntities)
-                      .insert(FileEntitiesCompanion.insert(name: '${imageName}',url: Value<String>(theUrl)));
+        return Scaffold(
+          appBar: AppBar(
+            // Here we take the value from the MyHomePage object that was created by
+            // the App.build method, and use it to set our appbar title.
+            title: Text(widget.title),
+          ),
+          body: Center(
+            // Center is a layout widget. It takes a single child and positions it
+            // in the middle of the parent.
+            child:
+                // FIXME This is why we should separate logic and view
+            Column(
+              children: [
+                MyImagePickerWidget(
+                  functionCallbackSetImageFilePath: (file){
+                    setState((){
+                      fileUploaded = file;
+                      imageName = file?.path.split("/").last ?? "";
+                    });
+                  },
+                ),
+                Expanded(child: _buildTaskList(context))
+              ],
+            ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: fileUploaded != null ? () async {
+              try {
+                final storage = FirebaseStorage.instance;
+                // Create a storage reference from our app
+                final storageRef = storage.ref();
 
-                  // Simple select:
-                  final allFiles = await database.select(database.fileEntities).get();
-                  print('Files in database: $allFiles');
-                  print("Success Upload to firebase cloud, URL: ${theUrl}");
-                  break;
-                case TaskState.canceled:
-                // ...
-                  break;
-                case TaskState.error:
-                // ...
-                  break;
+                // Create a reference to "mountains.jpg"
+                final mountainsRef = storageRef.child(imageName);
 
+                // upload file ke storage
+                mountainsRef.putFile(fileUploaded!).snapshotEvents.listen((taskSnapshot) async {
+                  switch(taskSnapshot.state){
+                    case TaskState.running:
+                    // ...
+                      break;
+                    case TaskState.paused:
+                    // ...
+                      break;
+                    case TaskState.success:
+                      final dao = Provider.of<FileEntityDao>(context,listen:false);
+                      var theUrl = await taskSnapshot.ref.getDownloadURL();
+
+                      // final database = MyDatabase();
+
+                      // Simple insert:
+                      await dao.insertFile(FileEntitiesCompanion.insert(name: '$imageName',url: DriftImport.Value<String>(theUrl)));
+                      // await database
+                      //     .into(database.fileEntities)
+                      //     .insert(FileEntitiesCompanion.insert(name: '${imageName}',url: DriftImport.Value<String>(theUrl)));
+
+                      // Simple select:
+                      // final allFiles = await database.select(database.fileEntities).get();
+                      // print('Files in database: $allFiles');
+                      print("Success Upload to firebase cloud, URL: ${theUrl}");
+                      break;
+                    case TaskState.canceled:
+                    // ...
+                      break;
+                    case TaskState.error:
+                    // ...
+                      break;
+
+                  }
+                });
+                    // .onData((data) {});
+              } on FirebaseException catch (e) {
+                print("ERROR: ${e.toString()}");
               }
-            });
-                // .onData((data) {});
-          } on FirebaseException catch (e) {
-            print("ERROR: ${e.toString()}");
-          }
-        } : null,
-        child: const Icon(Icons.send),),
+            } : null,
+            child: const Icon(Icons.send),),
+        );
+      }
     );
   }
 }

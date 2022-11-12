@@ -42,7 +42,7 @@ void main() async {
   final AuthCredential cred = GoogleAuthProvider.credential(idToken: googleAuth?.idToken, accessToken: googleAuth?.accessToken);
   final UserCredential _res = await FirebaseAuth.instance.signInWithCredential(cred);
   firebaseUser = _res.user;
-  print(firebaseUser);
+  print("firebaseUser: $firebaseUser");
 
   var statusCamera = await Permission.camera.status;
   var statusStorage = await Permission.storage.status;

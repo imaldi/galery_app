@@ -1,5 +1,6 @@
 import 'dart:io';
 // This is why we should separate logic and view
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:drift/drift.dart' as DriftImport;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:galery_app/core/resources/consts/sizes.dart';
@@ -34,15 +35,15 @@ void main() async {
     androidProvider: AndroidProvider.debug,
   );
 
-  // Firebase sign in (nanti pindahkan ke halaman login)
-  final GoogleSignIn googleSignIn = GoogleSignIn();
-  User? firebaseUser;
-  GoogleSignInAccount? account = await googleSignIn.signIn();
-  final GoogleSignInAuthentication? googleAuth = await account?.authentication;
-  final AuthCredential cred = GoogleAuthProvider.credential(idToken: googleAuth?.idToken, accessToken: googleAuth?.accessToken);
-  final UserCredential _res = await FirebaseAuth.instance.signInWithCredential(cred);
-  firebaseUser = _res.user;
-  print("firebaseUser: $firebaseUser");
+  // Firebase sign in (nanti pindahkan cuma ketika masuk dari halaman login)
+  // final GoogleSignIn googleSignIn = GoogleSignIn();
+  // User? firebaseUser;
+  // GoogleSignInAccount? account = await googleSignIn.signIn();
+  // final GoogleSignInAuthentication? googleAuth = await account?.authentication;
+  // final AuthCredential cred = GoogleAuthProvider.credential(idToken: googleAuth?.idToken, accessToken: googleAuth?.accessToken);
+  // final UserCredential _res = await FirebaseAuth.instance.signInWithCredential(cred);
+  // firebaseUser = _res.user;
+  // print(firebaseUser);
 
   var statusCamera = await Permission.camera.status;
   var statusStorage = await Permission.storage.status;
@@ -152,7 +153,16 @@ class _MyHomePageState extends State<MyHomePage> {
                             SizedBox(
                                 width: sizeHuge,
                                 height: sizeHuge,
-                                child: Image.network("${itemTask.theFile.url}",width: sizeMedium,fit: BoxFit.cover,)),
+                                child:
+                                // Image.network("${itemTask.theFile.url}",width: sizeMedium,fit: BoxFit.cover,),
+                                CachedNetworkImage(imageUrl:
+                                    "${itemTask.theFile.url}",
+                                  placeholder: (context, url) => const CircularProgressIndicator(),
+                                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                                fit: BoxFit.cover,
+                                // loadingBuilder: (c,w,ice) => const CircularProgressIndicator(),
+                                ),
+                            ),
                           ],
                         ),
                       ),
